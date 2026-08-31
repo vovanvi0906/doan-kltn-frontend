@@ -1,0 +1,70 @@
+import React from 'react';
+import { useAuth } from '../../../store/authStore';
+import { useNavigate } from 'react-router-dom';
+import { Crown, LogOut, Shield, Users, Briefcase, Activity } from 'lucide-react';
+
+export default function DashboardPage() {
+  const { user, role, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-6 sm:p-10">
+      <div className="max-w-6xl mx-auto space-y-8">
+        {/* Top Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase mb-2">
+              <Crown className="w-3.5 h-3.5" />
+              <span>Admin Control Center</span>
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight text-white">Quản Trị Hệ Thống (/admin/dashboard)</h1>
+            <p className="text-sm text-slate-400">Chào mừng trở lại, {user?.fullName || user?.email || 'Administrator'}</p>
+          </div>
+
+          <button
+            onClick={handleLogout}
+            className="self-start sm:self-center inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-rose-600/20 hover:border-rose-500/40 border border-slate-700 text-slate-300 hover:text-rose-300 text-sm font-medium transition-all cursor-pointer"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Đăng xuất</span>
+          </button>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
+              <Shield className="w-5 h-5" />
+            </div>
+            <h3 className="text-lg font-semibold text-white">Vai trò hiện tại</h3>
+            <p className="text-2xl font-bold text-amber-400">{role || 'ADMIN'}</p>
+            <p className="text-xs text-slate-500">Quyền hạn cao nhất toàn hệ thống</p>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
+              <Users className="w-5 h-5" />
+            </div>
+            <h3 className="text-lg font-semibold text-white">Người dùng</h3>
+            <p className="text-2xl font-bold text-blue-400">Hoạt động bình thường</p>
+            <p className="text-xs text-slate-500">Sẵn sàng quản lý tài khoản</p>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+              <Activity className="w-5 h-5" />
+            </div>
+            <h3 className="text-lg font-semibold text-white">Trạng thái Phiên</h3>
+            <p className="text-2xl font-bold text-emerald-400">Authenticated</p>
+            <p className="text-xs text-slate-500">Token lưu trữ trong LocalStorage</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
