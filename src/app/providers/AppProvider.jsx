@@ -1,10 +1,13 @@
 import React from 'react';
 import { AuthProvider } from '../../store/authStore';
+import { ThemeProvider } from '../../store/themeStore';
 
 export default function AppProvider({ children }) {
   return (
-    <AuthProvider>
-      {children}
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        {children}
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

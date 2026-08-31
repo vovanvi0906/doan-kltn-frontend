@@ -2,9 +2,25 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from '../../features/auth/pages/LoginPage';
 import DashboardPage from '../../features/dashboard/pages/DashboardPage';
+import UsersPage from '../../features/users/pages/UsersPage';
 import WorkerDashboardPage from '../../features/workers/pages/WorkerDashboardPage';
 import HomePage from '../../pages/HomePage';
 import ProtectedRoute from './ProtectedRoute';
+import { useAuth } from '../../store/authStore';
+
+// Root redirector based on authenticated user's role
+function HomeOrDashboardRedirect() {
+  const { role } = useAuth();
+  const normalizedRole = String(role || '').toUpperCase();
+
+  if (normalizedRole === 'ADMIN') {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+  if (normalizedRole === 'WORKER') {
+    return <Navigate to="/worker/dashboard" replace />;
+  }
+  return <HomePage />;
+}
 
 export default function AppRoutes() {
   return (
@@ -12,12 +28,20 @@ export default function AppRoutes() {
       {/* Public Auth Route */}
       <Route path="/login" element={<LoginPage />} />
 
-      {/* Admin Route */}
+      {/* Admin Routes */}
       <Route
         path="/admin/dashboard"
         element={
           <ProtectedRoute allowedRoles={['ADMIN']}>
             <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <ProtectedRoute allowedRoles={['ADMIN']}>
+            <UsersPage />
           </ProtectedRoute>
         }
       />
@@ -34,12 +58,12 @@ export default function AppRoutes() {
       />
       <Route path="/worker" element={<Navigate to="/worker/dashboard" replace />} />
 
-      {/* Customer / Home Route */}
+      {/* Customer / Home Route (Auto redirect ADMIN -> /admin/dashboard, WORKER -> /worker/dashboard) */}
       <Route
         path="/"
         element={
           <ProtectedRoute allowedRoles={['CUSTOMER', 'ADMIN', 'WORKER']}>
-            <HomePage />
+            <HomeOrDashboardRedirect />
           </ProtectedRoute>
         }
       />
