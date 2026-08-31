@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from '../features/auth/pages/LoginPage';
+import RegisterPage from '../features/auth/pages/RegisterPage';
 import DashboardPage from '../features/dashboard/pages/DashboardPage';
 import UsersPage from '../features/users/pages/UsersPage';
 import WorkerDashboardPage from '../features/workers/pages/WorkerDashboardPage';
@@ -26,8 +27,9 @@ function HomeOrDashboardRedirect() {
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* 1. Public Authentication Route */}
+      {/* 1. Public Authentication Routes */}
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
 
       {/* 2. Admin Management Protected Routes with AdminLayout */}
       <Route

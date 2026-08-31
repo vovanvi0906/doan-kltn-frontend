@@ -37,6 +37,23 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  const register = useCallback(async (userData) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await authService.register(userData);
+      setUser(data.user);
+      setAccessToken(data.accessToken);
+      return data;
+    } catch (err) {
+      const errMsg = err.friendlyMessage || err.response?.data?.message || err.message || 'Đăng ký thất bại';
+      setError(errMsg);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   const logout = useCallback(() => {
     authService.logout();
     setUser(null);
@@ -52,6 +69,7 @@ export const AuthProvider = ({ children }) => {
     isLoading,
     error,
     login,
+    register,
     logout,
     setUser,
   };

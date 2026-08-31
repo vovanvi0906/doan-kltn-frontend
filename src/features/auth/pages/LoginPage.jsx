@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   User,
   Lock,
@@ -314,13 +314,12 @@ export default function LoginPage() {
             <div className="text-center mt-5">
               <span className="text-xs text-slate-300">
                 Chưa có tài khoản?{' '}
-                <button
-                  type="button"
-                  onClick={() => showToast('error', 'Chức năng Đăng ký tài khoản đang được hoàn thiện.')}
+                <Link
+                  to="/register"
                   className="text-[#e2934b] hover:text-[#f3a863] font-semibold hover:underline cursor-pointer transition-colors"
                 >
                   Đăng ký ngay
-                </button>
+                </Link>
               </span>
             </div>
 
