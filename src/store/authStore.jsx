@@ -1,20 +1,43 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { tokenStorage } from '../services/storage/tokenStorage';
 import authService from '../features/auth/services/auth.service';
+import { isTokenExpired } from '../utils/jwt';
 
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => tokenStorage.getUser());
-  const [accessToken, setAccessToken] = useState(() => tokenStorage.getAccessToken());
+  // Khởi tạo state an toàn: nếu token trong storage đã hết hạn thì xóa ngay lập tức
+  const [accessToken, setAccessToken] = useState(() => {
+    const token = tokenStorage.getAccessToken();
+    if (token && isTokenExpired(token, 10)) {
+      console.warn('⚠️ [AuthProvider]: Token trong storage đã hết hạn khi khởi động. Đang dọn dẹp...');
+      tokenStorage.clearAuth();
+      return null;
+    }
+    return token;
+  });
+
+  const [user, setUser] = useState(() => {
+    const token = tokenStorage.getAccessToken();
+    if (!token || isTokenExpired(token, 10)) {
+      return null;
+    }
+    return tokenStorage.getUser();
+  });
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Synchronize state from storage on mount
+  // Đồng bộ và kiểm tra lại trạng thái khi Mount
   useEffect(() => {
-    const storedUser = tokenStorage.getUser();
     const storedToken = tokenStorage.getAccessToken();
-    if (storedUser && storedToken) {
+    const storedUser = tokenStorage.getUser();
+
+    if (storedToken && isTokenExpired(storedToken, 10)) {
+      tokenStorage.clearAuth();
+      setUser(null);
+      setAccessToken(null);
+    } else if (storedToken && storedUser) {
       setUser(storedUser);
       setAccessToken(storedToken);
     }

@@ -1,10 +1,14 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../store/authStore';
+import { useAuthCheck } from '../../hooks/useAuthCheck';
 
 export default function ProtectedRoute({ children, allowedRoles }) {
   const { isAuthenticated, role, isLoading } = useAuth();
   const location = useLocation();
+
+  // Kích hoạt cơ chế kiểm tra hạn JWT chủ động (Proactive Check)
+  useAuthCheck();
 
   if (isLoading) {
     return (
