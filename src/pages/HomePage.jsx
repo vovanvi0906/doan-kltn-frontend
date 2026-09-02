@@ -1,69 +1,84 @@
-import React from 'react';
-import { useAuth } from '../store/authStore';
-import { useNavigate } from 'react-router-dom';
-import { User, LogOut, Sparkles, Home, ShoppingBag, ShieldCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import CustomerSidebar from '../features/customer/components/CustomerSidebar';
+import CustomerNavbar from '../features/customer/components/CustomerNavbar';
+import HomeOverviewView from '../features/customer/views/HomeOverviewView';
+import ServicesCatalogView from '../features/customer/views/ServicesCatalogView';
+import OrdersManagementView from '../features/customer/views/OrdersManagementView';
+import UserProfileView from '../features/customer/views/UserProfileView';
+import WalletView from '../features/customer/views/WalletView';
+import AiDiagnosisView from '../features/customer/views/AiDiagnosisView';
+import PromotionsView from '../features/customer/views/PromotionsView';
+import SettingsSupportView from '../features/customer/views/SettingsSupportView';
+import NotificationsView from '../features/customer/views/NotificationsView';
+import ScheduledBookingsView from '../features/customer/views/ScheduledBookingsView';
+import SavedAddressesView from '../features/customer/views/SavedAddressesView';
 
 export default function HomePage() {
-  const { user, role, logout } = useAuth();
-  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('home');
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleOrderCreated = () => {
+    setRefreshKey((k) => k + 1);
+  };
+
+  // Switch views according to active tab
+  const renderViewContent = () => {
+    switch (activeTab) {
+      case 'home':
+        return <HomeOverviewView onOrderCreated={handleOrderCreated} setActiveTab={setActiveTab} />;
+      case 'services':
+        return <ServicesCatalogView onOrderCreated={handleOrderCreated} />;
+      case 'ai-diagnosis':
+        return <AiDiagnosisView />;
+      case 'orders':
+        return <OrdersManagementView key={refreshKey} />;
+      case 'scheduled':
+        return <ScheduledBookingsView setActiveTab={setActiveTab} />;
+      case 'addresses':
+        return <SavedAddressesView />;
+      case 'wallet':
+        return <WalletView />;
+      case 'promotions':
+        return <PromotionsView />;
+      case 'profile':
+        return <UserProfileView />;
+      case 'notifications':
+        return <NotificationsView />;
+      case 'settings':
+        return <SettingsSupportView />;
+      default:
+        return <HomeOverviewView onOrderCreated={handleOrderCreated} setActiveTab={setActiveTab} />;
+    }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6 sm:p-10">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* Top Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold uppercase mb-2">
-              <Home className="w-3.5 h-3.5" />
-              <span>Customer Portal</span>
-            </div>
-            <h1 className="text-3xl font-bold tracking-tight text-white">Trang Chủ Dịch Vụ (Home - /)</h1>
-            <p className="text-sm text-slate-400">Xin chào, {user?.fullName || user?.email || 'Khách hàng'}</p>
-          </div>
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-row">
+      {/* 1. Left Sidebar Navigation */}
+      <CustomerSidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        isCollapsed={isCollapsed}
+        setIsCollapsed={setIsCollapsed}
+      />
 
-          <button
-            onClick={handleLogout}
-            className="self-start sm:self-center inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-rose-600/20 hover:border-rose-500/40 border border-slate-700 text-slate-300 hover:text-rose-300 text-sm font-medium transition-all cursor-pointer"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Đăng xuất</span>
-          </button>
-        </div>
+      {/* 2. Main Content Wrapper */}
+      <div
+        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
+          isCollapsed ? 'ml-20' : 'ml-72'
+        }`}
+      >
+        {/* Top Navbar */}
+        <CustomerNavbar
+          isCollapsed={isCollapsed}
+          setIsCollapsed={setIsCollapsed}
+          setActiveTab={setActiveTab}
+        />
 
-        {/* Welcome Card */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
-              <User className="w-5 h-5" />
-            </div>
-            <h3 className="text-lg font-semibold text-white">Vai trò tài khoản</h3>
-            <p className="text-2xl font-bold text-emerald-400">{role || 'CUSTOMER'}</p>
-            <p className="text-xs text-slate-500">Khách hàng sử dụng dịch vụ tiện ích</p>
-          </div>
-
-          <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
-              <ShoppingBag className="w-5 h-5" />
-            </div>
-            <h3 className="text-lg font-semibold text-white">Dịch vụ đã đặt</h3>
-            <p className="text-2xl font-bold text-blue-400">0 dịch vụ</p>
-            <p className="text-xs text-slate-500">Khám phá các gói dọn dẹp & sửa chữa</p>
-          </div>
-
-          <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <h3 className="text-lg font-semibold text-white">Bảo mật tài khoản</h3>
-            <p className="text-2xl font-bold text-indigo-400">JWT Verified</p>
-            <p className="text-xs text-slate-500">Phiên làm việc an toàn</p>
-          </div>
-        </div>
+        {/* Dynamic View Body (Full desktop width with comfortable padding) */}
+        <main className="flex-1 p-6 sm:p-8 md:p-10 max-w-7xl w-full mx-auto">
+          {renderViewContent()}
+        </main>
       </div>
     </div>
   );

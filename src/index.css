@@ -11,4 +11,19 @@ body {
   margin: 0;
   padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: #020617;
+}
+
+/* Ẩn hoàn toàn thanh cuộn trình duyệt nhưng vẫn cho phép cuộn mượt mà */
+.no-scrollbar::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.no-scrollbar,
+.custom-scrollbar {
+  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important; /* Firefox */
 }
