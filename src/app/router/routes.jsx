@@ -7,6 +7,7 @@ import WorkersManagementPage from '../../features/workers/pages/WorkersManagemen
 import ServicesManagementPage from '../../features/services/pages/ServicesManagementPage';
 import OrdersManagementPage from '../../features/orders/pages/OrdersManagementPage';
 import AnalyticsPage from '../../features/analytics/pages/AnalyticsPage';
+import SystemSettingsPage from '../../features/settings/pages/SystemSettingsPage';
 import WorkerDashboardPage from '../../features/workers/pages/WorkerDashboardPage';
 import HomePage from '../../pages/HomePage';
 import ProtectedRoute from './ProtectedRoute';
@@ -78,6 +79,14 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={['ADMIN']}>
             <AnalyticsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/settings"
+        element={
+          <ProtectedRoute allowedRoles={['ADMIN']}>
+            <SystemSettingsPage />
           </ProtectedRoute>
         }
       />

@@ -40,3 +40,55 @@ body {
 .animate-spin-slow {
   animation: spin-slow 16s linear infinite;
 }
+
+/* ========================================================
+   MOUSE-FOLLOWING SPOTLIGHT GLOW EFFECT (LINEAR / VERCEL STYLE)
+   ======================================================== */
+.spotlight-card {
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.spotlight-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    500px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    var(--spotlight-color, rgba(59, 130, 246, 0.14)),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.spotlight-card:hover::before {
+  opacity: 1;
+}
+
+.spotlight-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.spotlight-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    220px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(59, 130, 246, 0.15),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.spotlight-item:hover::before {
+  opacity: 1;
+}

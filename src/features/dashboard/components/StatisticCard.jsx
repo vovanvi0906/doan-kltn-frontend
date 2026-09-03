@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import SpotlightCard from '../../../components/ui/SpotlightCard';
 
 /**
  * Enterprise Metric Card (Linear / Vercel style)
@@ -23,24 +24,28 @@ export default function StatisticCard({
       bg: 'bg-blue-50 dark:bg-blue-950/40',
       border: 'border-blue-200/60 dark:border-blue-800/40',
       stroke: '#3b82f6',
+      spotlight: 'rgba(59, 130, 246, 0.16)',
     },
     emerald: {
       text: 'text-emerald-600 dark:text-emerald-400',
       bg: 'bg-emerald-50 dark:bg-emerald-950/40',
       border: 'border-emerald-200/60 dark:border-emerald-800/40',
       stroke: '#10b981',
+      spotlight: 'rgba(16, 185, 129, 0.16)',
     },
     amber: {
       text: 'text-amber-600 dark:text-amber-400',
       bg: 'bg-amber-50 dark:bg-amber-950/40',
       border: 'border-amber-200/60 dark:border-amber-800/40',
       stroke: '#f59e0b',
+      spotlight: 'rgba(245, 158, 11, 0.16)',
     },
     purple: {
       text: 'text-purple-600 dark:text-purple-400',
       bg: 'bg-purple-50 dark:bg-purple-950/40',
       border: 'border-purple-200/60 dark:border-purple-800/40',
       stroke: '#8b5cf6',
+      spotlight: 'rgba(139, 92, 246, 0.16)',
     },
   };
 
@@ -62,8 +67,9 @@ export default function StatisticCard({
     .join(' ');
 
   return (
-    <div
+    <SpotlightCard
       onClick={onClick}
+      spotlightColor={scheme.spotlight}
       className={`group relative p-4 rounded-xl bg-white dark:bg-[#1e293b]/60 border border-slate-200 dark:border-slate-800 shadow-2xs transition-all duration-150 flex flex-col justify-between select-none ${
         onClick ? 'cursor-pointer hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xs' : ''
       }`}
@@ -126,6 +132,7 @@ export default function StatisticCard({
           </div>
         )}
       </div>
-    </div>
+    </SpotlightCard>
   );
 }
+

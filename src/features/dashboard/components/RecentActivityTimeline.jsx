@@ -13,6 +13,19 @@ import {
  * Real Vertical Timeline with connecting line, categorized color icons,
  * and high-contrast typography in Linear / Vercel style.
  */
+function formatRelativeTime(createdAt, fallbackTime) {
+  if (fallbackTime) return fallbackTime;
+  if (!createdAt) return 'Vừa xong';
+  const diff = Math.max(0, Date.now() - new Date(createdAt).getTime());
+  const mins = Math.floor(diff / (1000 * 60));
+  if (mins < 1) return 'Vừa xong';
+  if (mins < 60) return `${mins} phút trước`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} giờ trước`;
+  const days = Math.floor(hours / 24);
+  return `${days} ngày trước`;
+}
+
 export default function RecentActivityTimeline({ activities = [] }) {
   const getEventBadge = (type) => {
     switch (type) {
@@ -29,6 +42,15 @@ export default function RecentActivityTimeline({ activities = [] }) {
           color: 'text-purple-600 dark:text-purple-400',
           bg: 'bg-purple-50 dark:bg-purple-950/60',
           border: 'border-purple-200/80 dark:border-purple-800/60',
+        };
+      case 'ORDER_IN_PROGRESS':
+      case 'ORDER_ASSIGNED':
+      case 'ORDER_CREATED':
+        return {
+          icon: Clock,
+          color: 'text-blue-600 dark:text-blue-400',
+          bg: 'bg-blue-50 dark:bg-blue-950/60',
+          border: 'border-blue-200/80 dark:border-blue-800/60',
         };
       case 'CUSTOMER_NEW':
         return {
@@ -54,6 +76,15 @@ export default function RecentActivityTimeline({ activities = [] }) {
     }
   };
 
+  if (!activities || activities.length === 0) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center py-10 text-slate-400 text-xs">
+        <Activity className="w-6 h-6 mb-1 text-slate-300 dark:text-slate-700" />
+        <span>Chưa có hoạt động phát sinh gần đây</span>
+      </div>
+    );
+  }
+
   return (
     <div className="relative flex-1 min-h-0 overflow-y-auto no-scrollbar py-1">
       {/* Continuous Vertical Timeline Line */}
@@ -63,6 +94,7 @@ export default function RecentActivityTimeline({ activities = [] }) {
         {activities.map((act) => {
           const badge = getEventBadge(act.type);
           const Icon = badge.icon;
+          const displayTime = formatRelativeTime(act.createdAt, act.time);
 
           return (
             <div
@@ -83,7 +115,7 @@ export default function RecentActivityTimeline({ activities = [] }) {
                     {act.title}
                   </h4>
                   <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500 shrink-0">
-                    {act.time}
+                    {displayTime}
                   </span>
                 </div>
 

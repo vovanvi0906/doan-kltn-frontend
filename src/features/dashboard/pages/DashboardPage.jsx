@@ -33,10 +33,10 @@ export default function DashboardPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [timeframe, setTimeframe] = useState('month'); // 'today' | 'week' | 'month'
 
-  const fetchStats = async () => {
+  const fetchStats = async (tf = timeframe) => {
     try {
       setLoading(true);
-      const data = await dashboardService.getDashboardStats();
+      const data = await dashboardService.getDashboardStats(tf);
       setStats(data);
     } catch (err) {
       console.error('Failed to load dashboard stats:', err);
@@ -47,12 +47,12 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    fetchStats();
-  }, []);
+    fetchStats(timeframe);
+  }, [timeframe]);
 
   const handleRefresh = () => {
     setRefreshing(true);
-    fetchStats();
+    fetchStats(timeframe);
   };
 
   return (
@@ -66,7 +66,7 @@ export default function DashboardPage() {
             Tổng Quan Hoạt Động
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Báo cáo hiệu suất vận hành dịch vụ FixGo thời gian thực
+            Báo cáo hiệu suất vận hành dịch vụ FixGo thời gian thực từ cơ sở dữ liệu
           </p>
         </div>
 
@@ -126,7 +126,7 @@ export default function DashboardPage() {
       {/* ========================================= */}
       {/* PENDING WORKER ALERT (COMPACT ENTERPRISE BANNER) */}
       {/* ========================================= */}
-      {stats?.pendingWorkers > 0 && (
+      {(stats?.pendingWorkers ?? 0) > 0 && (
         <div className="my-2 p-2.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 flex items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-6 h-6 rounded-md bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-300 flex items-center justify-center shrink-0">
@@ -143,7 +143,7 @@ export default function DashboardPage() {
           </div>
           <button
             type="button"
-            onClick={() => navigate('/admin/users')}
+            onClick={() => navigate('/admin/workers')}
             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold transition-all shrink-0 cursor-pointer shadow-2xs"
           >
             <span>Phê duyệt ngay</span>
@@ -158,49 +158,62 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 my-2 shrink-0">
         <StatisticCard
           title="Khách Hàng"
-          value={loading ? '...' : (stats?.totalCustomers || 0).toLocaleString()}
+          value={loading ? '...' : (stats?.totalCustomers ?? 0).toLocaleString()}
           subtext="Tài khoản khách hàng"
           icon={Users}
           trend="up"
-          trendValue="+12% vs tháng trước"
+          trendValue={`${stats?.totalCustomers ?? 0} tài khoản`}
           colorScheme="blue"
-          sparklineData={[45, 52, 58, 65, 72, 85, 98, 128]}
+          sparklineData={[
+            Math.max(0, Math.round((stats?.totalCustomers ?? 0) * 0.5)),
+            Math.max(0, Math.round((stats?.totalCustomers ?? 0) * 0.8)),
+            stats?.totalCustomers ?? 0,
+          ]}
           onClick={() => navigate('/admin/users')}
         />
 
         <StatisticCard
           title="Đối Tác Thợ"
-          value={loading ? '...' : (stats?.totalWorkers || 0).toLocaleString()}
+          value={loading ? '...' : (stats?.totalWorkers ?? 0).toLocaleString()}
           subtext="Thợ đã kích hoạt"
           icon={Briefcase}
           trend="up"
-          trendValue="+8% vs tháng trước"
+          trendValue={`${stats?.onlineWorkers ?? 0} online / ${stats?.totalWorkers ?? 0} duyệt`}
           colorScheme="emerald"
-          sparklineData={[18, 22, 26, 30, 35, 38, 41, 45]}
-          onClick={() => navigate('/admin/users')}
+          sparklineData={[
+            Math.max(0, Math.round((stats?.totalWorkers ?? 0) * 0.5)),
+            Math.max(0, Math.round((stats?.totalWorkers ?? 0) * 0.8)),
+            stats?.totalWorkers ?? 0,
+          ]}
+          onClick={() => navigate('/admin/workers')}
         />
 
         <StatisticCard
           title="Hồ Sơ Chờ Duyệt"
-          value={loading ? '...' : (stats?.pendingWorkers || 0).toLocaleString()}
+          value={loading ? '...' : (stats?.pendingWorkers ?? 0).toLocaleString()}
           subtext="Cần xác thực CCCD"
           icon={Clock}
-          trend="down"
-          trendValue="7 hồ sơ mới"
+          trend={stats?.pendingWorkers > 0 ? 'down' : 'up'}
+          trendValue={stats?.pendingWorkers > 0 ? `${stats.pendingWorkers} hồ sơ mới` : 'Đã duyệt hết'}
           colorScheme="amber"
-          sparklineData={[3, 5, 4, 8, 6, 9, 7, 7]}
-          onClick={() => navigate('/admin/users')}
+          sparklineData={[0, stats?.pendingWorkers ?? 0]}
+          onClick={() => navigate('/admin/workers')}
         />
 
         <StatisticCard
           title="Tổng Đơn Đặt"
-          value={loading ? '...' : (stats?.totalOrders || 0).toLocaleString()}
+          value={loading ? '...' : (stats?.totalOrders ?? 0).toLocaleString()}
           subtext="Đơn đặt dịch vụ"
           icon={ShoppingBag}
           trend="up"
-          trendValue="+15% tuần này"
+          trendValue={`${stats?.completedOrders ?? 0} đơn hoàn thành`}
           colorScheme="purple"
-          sparklineData={[110, 140, 180, 210, 245, 270, 295, 312]}
+          sparklineData={[
+            Math.max(0, Math.round((stats?.totalOrders ?? 0) * 0.3)),
+            Math.max(0, Math.round((stats?.totalOrders ?? 0) * 0.7)),
+            stats?.totalOrders ?? 0,
+          ]}
+          onClick={() => navigate('/admin/orders')}
         />
       </div>
 
@@ -232,10 +245,10 @@ export default function DashboardPage() {
           <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 shrink-0">
             <button
               type="button"
-              onClick={() => navigate('/admin/users')}
+              onClick={() => navigate('/admin/orders')}
               className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 transition-colors cursor-pointer"
             >
-              <span>Xem tất cả danh sách người dùng & đối tác</span>
+              <span>Xem chi tiết danh sách đơn đặt & hoạt động</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -260,15 +273,15 @@ export default function DashboardPage() {
           {/* SVG Donut Chart + Legend */}
           <ServiceDistributionChart
             services={stats?.serviceDistribution || []}
-            totalOrders={stats?.totalOrders || 312}
+            totalOrders={stats?.totalOrders ?? 0}
           />
 
           {/* Quick Action Footer */}
           <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 shrink-0">
             <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-              <span>Thống kê 4 nhóm dịch vụ chính</span>
+              <span>Thống kê danh mục dịch vụ</span>
               <span className="font-semibold text-slate-700 dark:text-slate-300 font-mono">
-                100% tỷ trọng
+                {stats?.serviceDistribution?.length ?? 0} danh mục
               </span>
             </div>
           </div>

@@ -3,6 +3,7 @@ import { analyticsService } from '../services/analytics.service';
 import RevenueChart from '../components/RevenueChart';
 import CategoryDistributionCard from '../components/CategoryDistributionCard';
 import TopWorkersCard from '../components/TopWorkersCard';
+import SpotlightCard from '../../../components/ui/SpotlightCard';
 import {
   FileBarChart,
   Download,
@@ -205,11 +206,14 @@ export default function AnalyticsPage() {
       </div>
 
       {/* ========================================= */}
-      {/* 2. 4 CORE KPI SUMMARY CARDS */}
+      {/* 2. 4 CORE KPI SUMMARY CARDS (WITH SPOTLIGHT GLOW) */}
       {/* ========================================= */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
-        {/* Card 1: Tổng Doanh Thu */}
-        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-1">
+        {/* Card 1: Tổng Doanh Thu (Emerald Glow) */}
+        <SpotlightCard
+          spotlightColor="rgba(16, 185, 129, 0.18)"
+          className="p-4 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-1 hover:border-emerald-500/40"
+        >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
               Tổng Doanh Thu
@@ -225,10 +229,13 @@ export default function AnalyticsPage() {
             <TrendingUp className="w-3 h-3" />
             <span>+{overview?.revenueGrowth ?? 0}% so với kỳ trước</span>
           </div>
-        </div>
+        </SpotlightCard>
 
-        {/* Card 2: Tổng Đơn Hàng */}
-        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-1">
+        {/* Card 2: Tổng Đơn Hàng (Blue Glow) */}
+        <SpotlightCard
+          spotlightColor="rgba(59, 130, 246, 0.18)"
+          className="p-4 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-1 hover:border-blue-500/40"
+        >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
               Tổng Đơn Đặt
@@ -245,10 +252,13 @@ export default function AnalyticsPage() {
             <TrendingUp className="w-3 h-3" />
             <span>+{overview?.ordersGrowth ?? 0}% đơn phát sinh mới</span>
           </div>
-        </div>
+        </SpotlightCard>
 
-        {/* Card 3: Khách Hàng & Thợ */}
-        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-1">
+        {/* Card 3: Khách Hàng & Thợ (Indigo Glow) */}
+        <SpotlightCard
+          spotlightColor="rgba(99, 102, 241, 0.18)"
+          className="p-4 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-1 hover:border-indigo-500/40"
+        >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
               Mạng Lưới Người Dùng
@@ -267,10 +277,13 @@ export default function AnalyticsPage() {
               {overview?.activeWorkers ?? 0} thợ online ({overview?.totalWorkers ?? 0} tổng)
             </span>
           </div>
-        </div>
+        </SpotlightCard>
 
-        {/* Card 4: Tỷ Lệ Hoàn Thành */}
-        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-1">
+        {/* Card 4: Tỷ Lệ Hoàn Thành (Amber Glow) */}
+        <SpotlightCard
+          spotlightColor="rgba(245, 158, 11, 0.18)"
+          className="p-4 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-1 hover:border-amber-500/40"
+        >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
               Tỷ Lệ Hoàn Thành
@@ -287,7 +300,7 @@ export default function AnalyticsPage() {
               ? 'Chỉ số hoàn tất dịch vụ đạt mức xuất sắc'
               : 'Chưa có đơn hàng nào hoàn tất trong kỳ'}
           </div>
-        </div>
+        </SpotlightCard>
       </div>
 
       {/* ========================================= */}

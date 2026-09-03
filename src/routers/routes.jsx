@@ -8,6 +8,7 @@ import WorkersManagementPage from '../features/workers/pages/WorkersManagementPa
 import OrdersManagementPage from '../features/orders/pages/OrdersManagementPage';
 import ServicesManagementPage from '../features/services/pages/ServicesManagementPage';
 import AnalyticsPage from '../features/analytics/pages/AnalyticsPage';
+import SystemSettingsPage from '../features/settings/pages/SystemSettingsPage';
 import WorkerDashboardPage from '../features/workers/pages/WorkerDashboardPage';
 import HomePage from '../pages/HomePage';
 import ProtectedRoute from '../app/router/ProtectedRoute';
@@ -54,7 +55,7 @@ export default function AppRoutes() {
         <Route path="commissions" element={<div className="p-4 text-slate-500">Chức năng Hoa hồng & Chiết khấu đang hoàn thiện.</div>} />
         <Route path="disputes" element={<div className="p-4 text-slate-500">Chức năng Khiếu nại & Tranh chấp đang hoàn thiện.</div>} />
         <Route path="reports" element={<AnalyticsPage />} />
-        <Route path="settings" element={<div className="p-4 text-slate-500">Cài đặt hệ thống đang hoàn thiện.</div>} />
+        <Route path="settings" element={<SystemSettingsPage />} />
       </Route>
 
       {/* 3. Worker Protected Routes */}
