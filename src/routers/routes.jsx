@@ -5,6 +5,7 @@ import RegisterPage from '../features/auth/pages/RegisterPage';
 import DashboardPage from '../features/dashboard/pages/DashboardPage';
 import UsersPage from '../features/users/pages/UsersPage';
 import WorkersManagementPage from '../features/workers/pages/WorkersManagementPage';
+import OrdersManagementPage from '../features/orders/pages/OrdersManagementPage';
 import WorkerDashboardPage from '../features/workers/pages/WorkerDashboardPage';
 import HomePage from '../pages/HomePage';
 import ProtectedRoute from '../app/router/ProtectedRoute';
@@ -46,7 +47,7 @@ export default function AppRoutes() {
         <Route path="users" element={<UsersPage />} />
         <Route path="workers" element={<WorkersManagementPage />} />
         <Route path="services" element={<div className="p-4 text-slate-500">Chức năng Quản lý Dịch vụ đang hoàn thiện.</div>} />
-        <Route path="orders" element={<div className="p-4 text-slate-500">Chức năng Quản lý Đơn hàng đang hoàn thiện.</div>} />
+        <Route path="orders" element={<OrdersManagementPage />} />
         <Route path="payments" element={<div className="p-4 text-slate-500">Chức năng Thanh toán & Ví tiền đang hoàn thiện.</div>} />
         <Route path="commissions" element={<div className="p-4 text-slate-500">Chức năng Hoa hồng & Chiết khấu đang hoàn thiện.</div>} />
         <Route path="disputes" element={<div className="p-4 text-slate-500">Chức năng Khiếu nại & Tranh chấp đang hoàn thiện.</div>} />
