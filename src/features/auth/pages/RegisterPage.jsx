@@ -154,7 +154,7 @@ export default function RegisterPage() {
     <div
       className="relative min-h-screen w-full flex items-center justify-center p-4 sm:p-6 select-none bg-cover bg-center bg-no-repeat overflow-x-hidden font-sans"
       style={{
-        backgroundImage: "url('/images/backgroundlogin.jpg')",
+        backgroundImage: "url('/images/backgroundlogin1.jpg')",
       }}
     >
       {/* Dark & Gradient Atmosphere Overlays */}

@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from '../../features/auth/pages/LoginPage';
 import DashboardPage from '../../features/dashboard/pages/DashboardPage';
 import UsersPage from '../../features/users/pages/UsersPage';
+import WorkersManagementPage from '../../features/workers/pages/WorkersManagementPage';
 import WorkerDashboardPage from '../../features/workers/pages/WorkerDashboardPage';
 import HomePage from '../../pages/HomePage';
 import ProtectedRoute from './ProtectedRoute';
@@ -42,6 +43,14 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={['ADMIN']}>
             <UsersPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/workers"
+        element={
+          <ProtectedRoute allowedRoles={['ADMIN']}>
+            <WorkersManagementPage />
           </ProtectedRoute>
         }
       />

@@ -4,6 +4,7 @@ import LoginPage from '../features/auth/pages/LoginPage';
 import RegisterPage from '../features/auth/pages/RegisterPage';
 import DashboardPage from '../features/dashboard/pages/DashboardPage';
 import UsersPage from '../features/users/pages/UsersPage';
+import WorkersManagementPage from '../features/workers/pages/WorkersManagementPage';
 import WorkerDashboardPage from '../features/workers/pages/WorkerDashboardPage';
 import HomePage from '../pages/HomePage';
 import ProtectedRoute from '../app/router/ProtectedRoute';
@@ -43,8 +44,7 @@ export default function AppRoutes() {
         <Route index element={<Navigate to="/admin/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="users" element={<UsersPage />} />
-        {/* Placeholder sub-routes for sidebar menu */}
-        <Route path="workers" element={<UsersPage />} />
+        <Route path="workers" element={<WorkersManagementPage />} />
         <Route path="services" element={<div className="p-4 text-slate-500">Chức năng Quản lý Dịch vụ đang hoàn thiện.</div>} />
         <Route path="orders" element={<div className="p-4 text-slate-500">Chức năng Quản lý Đơn hàng đang hoàn thiện.</div>} />
         <Route path="payments" element={<div className="p-4 text-slate-500">Chức năng Thanh toán & Ví tiền đang hoàn thiện.</div>} />
