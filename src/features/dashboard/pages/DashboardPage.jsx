@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../store/authStore';
-import { dashboardService } from '../services/dashboard.service';
+import { useDashboardData } from '../hooks/useDashboardData';
 import StatisticCard from '../components/StatisticCard';
 import ServiceDistributionChart from '../components/ServiceDistributionChart';
 import RecentActivityTimeline from '../components/RecentActivityTimeline';
+import { DashboardErrorState } from '../components/DashboardStates';
 import {
   Users,
   Briefcase,
@@ -18,59 +19,50 @@ import {
 } from 'lucide-react';
 
 /**
- * Enterprise-Grade Admin Dashboard (Linear / Vercel Style)
- * - Data-dense, clean, professional layout fitting viewport without scrollbars
- * - 4-column KPI metric cards with micro-sparklines & mono typography
- * - Real connected Activity Timeline + SVG Donut Service Distribution
- * - Strictly adheres to the 8pt Grid system and Enterprise SaaS aesthetics
+ * Enterprise Admin Dashboard Overview (Linear / Vercel Style)
+ * - Tách biệt hoàn toàn UI và Logic qua Custom Hook `useDashboardData`
+ * - Sử dụng Skeleton loading cho tất cả thành phần dữ liệu (tuyệt đối không dùng spinner)
+ * - Tuân thủ nghiêm ngặt 8pt Grid System (p-4, gap-4, space-y-4)
+ * - Giao diện sắc nét, viền mỏng border border-slate-200 dark:border-slate-800
+ * - Kết nối trực tiếp 3 RESTful endpoints:
+ *   - GET /api/v1/dashboard/overview
+ *   - GET /api/v1/dashboard/activities
+ *   - GET /api/v1/dashboard/service-distribution
  */
 export default function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [timeframe, setTimeframe] = useState('month'); // 'today' | 'week' | 'month'
-
-  const fetchStats = async (tf = timeframe) => {
-    try {
-      setLoading(true);
-      const data = await dashboardService.getDashboardStats(tf);
-      setStats(data);
-    } catch (err) {
-      console.error('Failed to load dashboard stats:', err);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchStats(timeframe);
-  }, [timeframe]);
-
-  const handleRefresh = () => {
-    setRefreshing(true);
-    fetchStats(timeframe);
-  };
+  // Tách biệt logic thông qua Custom Hook chuyên biệt
+  const {
+    overview,
+    activities,
+    distribution,
+    totalOrdersDistribution,
+    loading,
+    refreshing,
+    error,
+    timeframe,
+    setTimeframe,
+    refetch,
+  } = useDashboardData('month');
 
   return (
     <div className="h-full overflow-hidden flex flex-col justify-between select-none transition-colors duration-200">
-      {/* ========================================= */}
-      {/* A. HEADER SECTION (TIÊU ĐỀ SẮC NÉT & ACTION BAR) */}
-      {/* ========================================= */}
+      {/* ======================================================== */}
+      {/* 1. HEADER SECTION (TIÊU ĐỀ SẮC NÉT & TIMEFRAME ACTION BAR) */}
+      {/* ======================================================== */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80 dark:border-slate-800/80 shrink-0">
         <div>
           <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white">
             Tổng Quan Hoạt Động
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Báo cáo hiệu suất vận hành dịch vụ FixGo thời gian thực từ cơ sở dữ liệu
+            Báo cáo hiệu suất vận hành dịch vụ FixGo thời gian thực từ hệ thống cơ sở dữ liệu
           </p>
         </div>
 
-        {/* Action Bar: Timeframe Filter + Status + Refresh */}
+        {/* Action Bar: Timeframe Segmented Control + Refresh Button */}
         <div className="flex items-center gap-2.5 self-start sm:self-center shrink-0">
           {/* Timeframe Segmented Control */}
           <div className="p-1 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 flex items-center text-xs">
@@ -112,10 +104,10 @@ export default function DashboardPage() {
           {/* Refresh Button */}
           <button
             type="button"
-            onClick={handleRefresh}
+            onClick={refetch}
             disabled={loading || refreshing}
             className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700/60 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs disabled:opacity-50"
-            title="Làm mới dữ liệu"
+            title="Làm mới dữ liệu từ máy chủ"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-blue-500' : ''}`} />
             <span className="hidden sm:inline">Làm mới</span>
@@ -123,10 +115,15 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ========================================= */}
-      {/* PENDING WORKER ALERT (COMPACT ENTERPRISE BANNER) */}
-      {/* ========================================= */}
-      {(stats?.pendingWorkers ?? 0) > 0 && (
+      {/* ======================================================== */}
+      {/* 2. ERROR STATE BANNER (NẾU GỌI API THẤT BẠI) */}
+      {/* ======================================================== */}
+      {error && <DashboardErrorState message={error} onRetry={refetch} />}
+
+      {/* ======================================================== */}
+      {/* 3. PENDING WORKER ALERT BANNER */}
+      {/* ======================================================== */}
+      {(overview?.pendingWorkers ?? 0) > 0 && (
         <div className="my-2 p-2.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 flex items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-6 h-6 rounded-md bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-300 flex items-center justify-center shrink-0">
@@ -134,10 +131,10 @@ export default function DashboardPage() {
             </div>
             <p className="text-xs truncate">
               <span className="font-bold text-slate-900 dark:text-amber-100 mr-1.5">
-                {stats.pendingWorkers} hồ sơ thợ chờ phê duyệt:
+                {overview.pendingWorkers} hồ sơ thợ chờ phê duyệt:
               </span>
               <span className="text-slate-600 dark:text-slate-400 hidden md:inline">
-                Cần kiểm tra giấy tờ CCCD và kỹ năng để cấp quyền nhận việc trên hệ thống.
+                Cần kiểm tra giấy tờ CCCD và bằng cấp kỹ năng để cấp quyền nhận việc trên hệ thống.
               </span>
             </p>
           </div>
@@ -152,76 +149,90 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ========================================= */}
-      {/* B. METRIC CARDS (KPI GRID - 4 CỘT) */}
-      {/* ========================================= */}
+      {/* ======================================================== */}
+      {/* 4. METRIC CARDS (KPI GRID - 4 CỘT CHUẨN 8PT) */}
+      {/* ======================================================== */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 my-2 shrink-0">
         <StatisticCard
           title="Khách Hàng"
-          value={loading ? '...' : (stats?.totalCustomers ?? 0).toLocaleString()}
+          value={(overview?.totalCustomers ?? 0).toLocaleString()}
           subtext="Tài khoản khách hàng"
           icon={Users}
           trend="up"
-          trendValue={`${stats?.totalCustomers ?? 0} tài khoản`}
+          trendValue={overview?.growth?.customers || `${overview?.totalCustomers ?? 0} tài khoản`}
           colorScheme="blue"
           sparklineData={[
-            Math.max(0, Math.round((stats?.totalCustomers ?? 0) * 0.5)),
-            Math.max(0, Math.round((stats?.totalCustomers ?? 0) * 0.8)),
-            stats?.totalCustomers ?? 0,
+            Math.max(0, Math.round((overview?.totalCustomers ?? 0) * 0.4)),
+            Math.max(0, Math.round((overview?.totalCustomers ?? 0) * 0.7)),
+            overview?.totalCustomers ?? 0,
           ]}
+          isLoading={loading}
           onClick={() => navigate('/admin/users')}
         />
 
         <StatisticCard
           title="Đối Tác Thợ"
-          value={loading ? '...' : (stats?.totalWorkers ?? 0).toLocaleString()}
+          value={(overview?.totalWorkers ?? 0).toLocaleString()}
           subtext="Thợ đã kích hoạt"
           icon={Briefcase}
           trend="up"
-          trendValue={`${stats?.onlineWorkers ?? 0} online / ${stats?.totalWorkers ?? 0} duyệt`}
+          trendValue={
+            overview?.growth?.workers ||
+            `${overview?.onlineWorkers ?? 0} online / ${overview?.totalWorkers ?? 0} duyệt`
+          }
           colorScheme="emerald"
           sparklineData={[
-            Math.max(0, Math.round((stats?.totalWorkers ?? 0) * 0.5)),
-            Math.max(0, Math.round((stats?.totalWorkers ?? 0) * 0.8)),
-            stats?.totalWorkers ?? 0,
+            Math.max(0, Math.round((overview?.totalWorkers ?? 0) * 0.4)),
+            Math.max(0, Math.round((overview?.totalWorkers ?? 0) * 0.8)),
+            overview?.totalWorkers ?? 0,
           ]}
+          isLoading={loading}
           onClick={() => navigate('/admin/workers')}
         />
 
         <StatisticCard
           title="Hồ Sơ Chờ Duyệt"
-          value={loading ? '...' : (stats?.pendingWorkers ?? 0).toLocaleString()}
+          value={(overview?.pendingWorkers ?? 0).toLocaleString()}
           subtext="Cần xác thực CCCD"
           icon={Clock}
-          trend={stats?.pendingWorkers > 0 ? 'down' : 'up'}
-          trendValue={stats?.pendingWorkers > 0 ? `${stats.pendingWorkers} hồ sơ mới` : 'Đã duyệt hết'}
+          trend={(overview?.pendingWorkers ?? 0) > 0 ? 'down' : 'up'}
+          trendValue={
+            (overview?.pendingWorkers ?? 0) > 0
+              ? `${overview.pendingWorkers} hồ sơ mới`
+              : 'Đã duyệt hết'
+          }
           colorScheme="amber"
-          sparklineData={[0, stats?.pendingWorkers ?? 0]}
+          sparklineData={[0, overview?.pendingWorkers ?? 0]}
+          isLoading={loading}
           onClick={() => navigate('/admin/workers')}
         />
 
         <StatisticCard
           title="Tổng Đơn Đặt"
-          value={loading ? '...' : (stats?.totalOrders ?? 0).toLocaleString()}
+          value={(overview?.totalOrders ?? 0).toLocaleString()}
           subtext="Đơn đặt dịch vụ"
           icon={ShoppingBag}
           trend="up"
-          trendValue={`${stats?.completedOrders ?? 0} đơn hoàn thành`}
+          trendValue={
+            overview?.growth?.orders ||
+            `${overview?.completedOrders ?? 0} đơn hoàn thành`
+          }
           colorScheme="purple"
           sparklineData={[
-            Math.max(0, Math.round((stats?.totalOrders ?? 0) * 0.3)),
-            Math.max(0, Math.round((stats?.totalOrders ?? 0) * 0.7)),
-            stats?.totalOrders ?? 0,
+            Math.max(0, Math.round((overview?.totalOrders ?? 0) * 0.3)),
+            Math.max(0, Math.round((overview?.totalOrders ?? 0) * 0.6)),
+            overview?.totalOrders ?? 0,
           ]}
+          isLoading={loading}
           onClick={() => navigate('/admin/orders')}
         />
       </div>
 
-      {/* ========================================= */}
-      {/* C. SPLIT SECTIONS (TIMELINE & PHÂN BỔ DỊCH VỤ - 7/5) */}
-      {/* ========================================= */}
+      {/* ======================================================== */}
+      {/* 5. SPLIT SECTIONS (TIMELINE 7 CỘT & PHÂN BỔ DỊCH VỤ 5 CỘT) */}
+      {/* ======================================================== */}
       <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-3 mt-1">
-        {/* Cột Trái (Hoạt Động Gần Đây - Timeline 7 Cột) */}
+        {/* Cột Trái: Hoạt Động Gần Đây (Timeline 7 Cột) */}
         <div className="lg:col-span-7 p-3.5 sm:p-4 rounded-xl bg-white dark:bg-[#1e293b]/50 border border-slate-200 dark:border-slate-800 shadow-2xs flex flex-col justify-between min-h-0">
           <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-slate-800/80 shrink-0">
             <div className="flex items-center gap-2">
@@ -239,7 +250,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Timeline List Component */}
-          <RecentActivityTimeline activities={stats?.recentActivities || []} />
+          <RecentActivityTimeline activities={activities} isLoading={loading} />
 
           {/* Quick Action Footer */}
           <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 shrink-0">
@@ -254,7 +265,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Cột Phải (Phân Bổ Dịch Vụ - Donut Chart 5 Cột) */}
+        {/* Cột Phải: Phân Bổ Dịch Vụ (Recharts Donut Chart 5 Cột) */}
         <div className="lg:col-span-5 p-3.5 sm:p-4 rounded-xl bg-white dark:bg-[#1e293b]/50 border border-slate-200 dark:border-slate-800 shadow-2xs flex flex-col justify-between min-h-0">
           <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-slate-800/80 shrink-0">
             <div className="flex items-center gap-2">
@@ -270,10 +281,11 @@ export default function DashboardPage() {
             </span>
           </div>
 
-          {/* SVG Donut Chart + Legend */}
+          {/* Recharts Donut Chart + Legend */}
           <ServiceDistributionChart
-            services={stats?.serviceDistribution || []}
-            totalOrders={stats?.totalOrders ?? 0}
+            services={distribution}
+            totalOrders={totalOrdersDistribution || overview?.totalOrders || 0}
+            isLoading={loading}
           />
 
           {/* Quick Action Footer */}
@@ -281,7 +293,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
               <span>Thống kê danh mục dịch vụ</span>
               <span className="font-semibold text-slate-700 dark:text-slate-300 font-mono">
-                {stats?.serviceDistribution?.length ?? 0} danh mục
+                {distribution?.length ?? 0} danh mục
               </span>
             </div>
           </div>

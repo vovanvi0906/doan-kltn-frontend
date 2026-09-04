@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import {
   UserPlus,
   Briefcase,
@@ -6,12 +7,14 @@ import {
   PackageCheck,
   Activity,
   Clock,
+  XCircle,
 } from 'lucide-react';
+import { TimelineSkeleton, DashboardEmptyState } from './DashboardStates';
 
 /**
- * RecentActivityTimeline Component
- * Real Vertical Timeline with connecting line, categorized color icons,
- * and high-contrast typography in Linear / Vercel style.
+ * Hàm định dạng thời gian tương đối
+ * @param {string} createdAt
+ * @param {string} [fallbackTime]
  */
 function formatRelativeTime(createdAt, fallbackTime) {
   if (fallbackTime) return fallbackTime;
@@ -26,7 +29,15 @@ function formatRelativeTime(createdAt, fallbackTime) {
   return `${days} ngày trước`;
 }
 
-export default function RecentActivityTimeline({ activities = [] }) {
+/**
+ * RecentActivityTimeline Component
+ * Dòng thời gian hiển thị các sự kiện phát sinh theo thời gian thực.
+ * Tích hợp Framer Motion whileHover={{ x: 4 }} cho từng bản ghi.
+ * Tuyệt đối không sử dụng CSS inline.
+ *
+ * @param {import('../../../types/dashboard').RecentActivityTimelineProps} props
+ */
+export default function RecentActivityTimeline({ activities = [], isLoading = false }) {
   const getEventBadge = (type) => {
     switch (type) {
       case 'WORKER_REGISTER':
@@ -36,12 +47,26 @@ export default function RecentActivityTimeline({ activities = [] }) {
           bg: 'bg-amber-50 dark:bg-amber-950/60',
           border: 'border-amber-200/80 dark:border-amber-800/60',
         };
+      case 'WORKER_APPROVED':
+        return {
+          icon: CheckCircle2,
+          color: 'text-emerald-600 dark:text-emerald-400',
+          bg: 'bg-emerald-50 dark:bg-emerald-950/60',
+          border: 'border-emerald-200/80 dark:border-emerald-800/60',
+        };
       case 'ORDER_COMPLETED':
         return {
           icon: PackageCheck,
           color: 'text-purple-600 dark:text-purple-400',
           bg: 'bg-purple-50 dark:bg-purple-950/60',
           border: 'border-purple-200/80 dark:border-purple-800/60',
+        };
+      case 'ORDER_CANCELLED':
+        return {
+          icon: XCircle,
+          color: 'text-rose-600 dark:text-rose-400',
+          bg: 'bg-rose-50 dark:bg-rose-950/60',
+          border: 'border-rose-200/80 dark:border-rose-800/60',
         };
       case 'ORDER_IN_PROGRESS':
       case 'ORDER_ASSIGNED':
@@ -55,16 +80,9 @@ export default function RecentActivityTimeline({ activities = [] }) {
       case 'CUSTOMER_NEW':
         return {
           icon: UserPlus,
-          color: 'text-blue-600 dark:text-blue-400',
-          bg: 'bg-blue-50 dark:bg-blue-950/60',
-          border: 'border-blue-200/80 dark:border-blue-800/60',
-        };
-      case 'WORKER_APPROVED':
-        return {
-          icon: CheckCircle2,
-          color: 'text-emerald-600 dark:text-emerald-400',
-          bg: 'bg-emerald-50 dark:bg-emerald-950/60',
-          border: 'border-emerald-200/80 dark:border-emerald-800/60',
+          color: 'text-cyan-600 dark:text-cyan-400',
+          bg: 'bg-cyan-50 dark:bg-cyan-950/60',
+          border: 'border-cyan-200/80 dark:border-cyan-800/60',
         };
       default:
         return {
@@ -76,18 +94,23 @@ export default function RecentActivityTimeline({ activities = [] }) {
     }
   };
 
+  if (isLoading) {
+    return <TimelineSkeleton />;
+  }
+
   if (!activities || activities.length === 0) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center py-10 text-slate-400 text-xs">
-        <Activity className="w-6 h-6 mb-1 text-slate-300 dark:text-slate-700" />
-        <span>Chưa có hoạt động phát sinh gần đây</span>
-      </div>
+      <DashboardEmptyState
+        title="Chưa có hoạt động mới"
+        description="Các sự kiện đơn hàng và đăng ký thợ sẽ xuất hiện tại đây theo thời gian thực."
+        icon={Activity}
+      />
     );
   }
 
   return (
     <div className="relative flex-1 min-h-0 overflow-y-auto no-scrollbar py-1">
-      {/* Continuous Vertical Timeline Line */}
+      {/* Trục đường kẻ kết nối thẳng đứng (Vertical Timeline Line) */}
       <div className="absolute left-3.5 top-3 bottom-3 w-px bg-slate-200 dark:bg-slate-800 pointer-events-none" />
 
       <div className="space-y-1">
@@ -97,8 +120,10 @@ export default function RecentActivityTimeline({ activities = [] }) {
           const displayTime = formatRelativeTime(act.createdAt, act.time);
 
           return (
-            <div
+            <motion.div
               key={act.id}
+              whileHover={{ x: 4 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
               className="group relative flex items-start gap-3 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors duration-150 cursor-default"
             >
               {/* Event Icon Indicator */}
@@ -123,7 +148,7 @@ export default function RecentActivityTimeline({ activities = [] }) {
                   {act.description}
                 </p>
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>

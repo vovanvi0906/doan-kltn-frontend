@@ -1,11 +1,15 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import SpotlightCard from '../../../components/ui/SpotlightCard';
+import Skeleton from '../../../components/ui/Skeleton';
 
 /**
- * Enterprise Metric Card (Linear / Vercel style)
- * Tuân thủ 8pt Grid, border-slate-200 dark:border-slate-800,
- * font-mono metrics, trend badge, và micro-sparkline SVG.
+ * Enterprise Metric Card (Linear / Vercel Style)
+ * Tuân thủ nghiêm ngặt 8pt Grid system, viền mỏng sắc sảo border-slate-200 dark:border-slate-800,
+ * font-mono metrics, trend badge, và hiệu ứng vi chuyển động Framer Motion mượt mà.
+ * Tuyệt đối không sử dụng CSS inline.
+ *
+ * @param {import('../../../types/dashboard').StatisticCardProps} props
  */
 export default function StatisticCard({
   title,
@@ -16,42 +20,64 @@ export default function StatisticCard({
   trendValue,
   colorScheme = 'blue',
   sparklineData = [35, 42, 38, 55, 48, 62, 70],
+  isLoading = false,
   onClick,
 }) {
   const colorMap = {
     blue: {
       text: 'text-blue-600 dark:text-blue-400',
       bg: 'bg-blue-50 dark:bg-blue-950/40',
-      border: 'border-blue-200/60 dark:border-blue-800/40',
+      border: 'border-blue-200/70 dark:border-blue-800/50',
       stroke: '#3b82f6',
-      spotlight: 'rgba(59, 130, 246, 0.16)',
     },
     emerald: {
       text: 'text-emerald-600 dark:text-emerald-400',
       bg: 'bg-emerald-50 dark:bg-emerald-950/40',
-      border: 'border-emerald-200/60 dark:border-emerald-800/40',
+      border: 'border-emerald-200/70 dark:border-emerald-800/50',
       stroke: '#10b981',
-      spotlight: 'rgba(16, 185, 129, 0.16)',
     },
     amber: {
       text: 'text-amber-600 dark:text-amber-400',
       bg: 'bg-amber-50 dark:bg-amber-950/40',
-      border: 'border-amber-200/60 dark:border-amber-800/40',
+      border: 'border-amber-200/70 dark:border-amber-800/50',
       stroke: '#f59e0b',
-      spotlight: 'rgba(245, 158, 11, 0.16)',
     },
     purple: {
       text: 'text-purple-600 dark:text-purple-400',
       bg: 'bg-purple-50 dark:bg-purple-950/40',
-      border: 'border-purple-200/60 dark:border-purple-800/40',
+      border: 'border-purple-200/70 dark:border-purple-800/50',
       stroke: '#8b5cf6',
-      spotlight: 'rgba(139, 92, 246, 0.16)',
+    },
+    cyan: {
+      text: 'text-cyan-600 dark:text-cyan-400',
+      bg: 'bg-cyan-50 dark:bg-cyan-950/40',
+      border: 'border-cyan-200/70 dark:border-cyan-800/50',
+      stroke: '#06b6d4',
     },
   };
 
   const scheme = colorMap[colorScheme] || colorMap.blue;
 
-  // Tính toán SVG Path cho Sparkline
+  if (isLoading) {
+    return (
+      <div className="p-4 rounded-xl bg-white dark:bg-[#1e293b]/60 border border-slate-200/80 dark:border-slate-800/80 shadow-2xs flex flex-col justify-between h-[124px] select-none">
+        <div className="flex items-center justify-between">
+          <Skeleton className="w-24 h-3.5" />
+          <Skeleton className="w-7 h-7 rounded-lg" />
+        </div>
+        <div className="flex items-end justify-between my-2">
+          <Skeleton className="w-20 h-7 rounded-md" />
+          <Skeleton className="w-16 h-5 rounded-md" />
+        </div>
+        <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
+          <Skeleton className="w-28 h-3" />
+          <Skeleton className="w-12 h-4 rounded" />
+        </div>
+      </div>
+    );
+  }
+
+  // Tính toán tọa độ SVG Path cho micro-sparkline
   const minVal = Math.min(...sparklineData);
   const maxVal = Math.max(...sparklineData);
   const range = maxVal - minVal || 1;
@@ -67,14 +93,15 @@ export default function StatisticCard({
     .join(' ');
 
   return (
-    <SpotlightCard
+    <motion.div
+      whileHover={onClick ? { y: -2, transition: { duration: 0.15 } } : undefined}
+      whileTap={onClick ? { scale: 0.99 } : undefined}
       onClick={onClick}
-      spotlightColor={scheme.spotlight}
-      className={`group relative p-4 rounded-xl bg-white dark:bg-[#1e293b]/60 border border-slate-200 dark:border-slate-800 shadow-2xs transition-all duration-150 flex flex-col justify-between select-none ${
-        onClick ? 'cursor-pointer hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xs' : ''
+      className={`group relative p-4 rounded-xl bg-white dark:bg-[#1e293b]/60 border border-slate-200/90 dark:border-slate-800/90 shadow-2xs transition-colors duration-150 flex flex-col justify-between select-none ${
+        onClick ? 'cursor-pointer hover:border-slate-300 dark:hover:border-slate-700' : ''
       }`}
     >
-      {/* Card Header: Title & Icon */}
+      {/* 1. Card Header: Title & Icon */}
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 tracking-wide">
           {title}
@@ -88,7 +115,7 @@ export default function StatisticCard({
         )}
       </div>
 
-      {/* Card Body: Big Mono Metric + Sparkline */}
+      {/* 2. Card Body: Big Mono Metric + Micro-Sparkline */}
       <div className="flex items-end justify-between my-2">
         <div className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-slate-900 dark:text-white leading-none">
           {value}
@@ -109,7 +136,7 @@ export default function StatisticCard({
         </div>
       </div>
 
-      {/* Card Footer: Trend Badge & Subtext */}
+      {/* 3. Card Footer: Trend Badge & Subtext */}
       <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-100 dark:border-slate-800/80">
         <span className="text-[11px] text-slate-400 dark:text-slate-500 truncate mr-2">
           {subtext}
@@ -132,7 +159,6 @@ export default function StatisticCard({
           </div>
         )}
       </div>
-    </SpotlightCard>
+    </motion.div>
   );
 }
-
