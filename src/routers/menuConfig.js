@@ -2,6 +2,7 @@ import {
   LayoutDashboard,
   Users,
   Briefcase,
+  Layers,
   Wrench,
   ShoppingBag,
   CreditCard,
@@ -35,8 +36,14 @@ export const adminMenuConfig = [
     icon: Briefcase,
   },
   {
+    id: 'categories',
+    title: 'Quản Lý Danh Mục',
+    path: '/admin/categories',
+    icon: Layers,
+  },
+  {
     id: 'services',
-    title: 'Danh Mục Dịch Vụ',
+    title: 'Quản Lý Dịch Vụ',
     path: '/admin/services',
     icon: Wrench,
   },

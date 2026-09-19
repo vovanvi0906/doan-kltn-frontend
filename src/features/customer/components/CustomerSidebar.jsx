@@ -5,7 +5,6 @@ import {
   ClipboardList,
   Calendar,
   MapPin,
-  Wallet,
   Sparkles,
   Gift,
   User,
@@ -37,9 +36,8 @@ export const MENU_GROUPS = [
     ],
   },
   {
-    title: 'TÀI CHÍNH & ƯU ĐÃI',
+    title: 'ƯU ĐÃI & KHUYẾN MÃI',
     items: [
-      { id: 'wallet', label: 'Ví FixGo & Nạp tiền', icon: Wallet },
       { id: 'promotions', label: 'Mã giảm giá & Voucher', icon: Gift, badge: '3' },
     ],
   },
@@ -53,7 +51,28 @@ export const MENU_GROUPS = [
   },
 ];
 
-export default function CustomerSidebar({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }) {
+/**
+ * CustomerSidebar Component (Linear / Vercel Style)
+ * Sidebar điều hướng Cổng Khách Hàng FixGo Pro.
+ *
+ * Tính năng UX:
+ * - Badge Thông báo Sidebar: Tự động hiển thị huy hiệu số lượng (chấm cam/số 1) ngay tại mục
+ *   "Đơn hàng của tôi" khi đang có đơn hàng active để thu hút sự chú ý của khách hàng.
+ *
+ * @param {Object} props
+ * @param {string} props.activeTab
+ * @param {Function} props.setActiveTab
+ * @param {boolean} props.isCollapsed
+ * @param {Function} props.setIsCollapsed
+ * @param {boolean} [props.hasActiveOrder] - Cờ xác định có đơn hàng đang hoạt động không
+ */
+export default function CustomerSidebar({
+  activeTab,
+  setActiveTab,
+  isCollapsed,
+  setIsCollapsed,
+  hasActiveOrder = false,
+}) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -87,7 +106,7 @@ export default function CustomerSidebar({ activeTab, setActiveTab, isCollapsed, 
         )}
 
         {isCollapsed && (
-          <div className="w-10 h-10 mx-auto rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 p-0.5 shadow-lg shadow-amber-500/20 flex items-center justify-center">
+          <div className="w-10 h-10 mx-auto rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 p-0.5 shadow-lg shadow-amber-500/20 flex items-center justify-center cursor-pointer" onClick={() => setActiveTab('home')}>
             <div className="w-full h-full rounded-[10px] bg-slate-950 flex items-center justify-center font-black text-amber-400 text-lg">
               FG
             </div>
@@ -112,35 +131,56 @@ export default function CustomerSidebar({ activeTab, setActiveTab, isCollapsed, 
               {group.items.map((item) => {
                 const IconComponent = item.icon;
                 const isActive = activeTab === item.id;
+                const isOrdersItem = item.id === 'orders';
+                const showOrderBadge = isOrdersItem && hasActiveOrder;
 
                 return (
                   <button
                     key={item.id}
                     onClick={() => setActiveTab(item.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer relative ${
                       isActive
                         ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-800/70'
+                        : 'text-slate-300 hover:text-white hover:bg-slate-800/70'
                     }`}
-                    title={isCollapsed ? item.label : undefined}
+                    title={isCollapsed ? `${item.label}${showOrderBadge ? ' (Đang có đơn hoạt động)' : ''}` : undefined}
                   >
-                    <div className="flex items-center gap-3">
-                      <IconComponent className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                    <div className="flex items-center gap-3 relative">
+                      <div className="relative">
+                        <IconComponent className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-300'}`} />
+                        {/* Dot badge khi sidebar thu nhỏ (Collapsed) */}
+                        {isCollapsed && showOrderBadge && (
+                          <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500" />
+                          </span>
+                        )}
+                      </div>
                       {!isCollapsed && <span className="truncate">{item.label}</span>}
                     </div>
 
-                    {!isCollapsed && item.badge && (
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                          item.badge === 'HOT'
-                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                            : item.badge === 'AI'
-                            ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                            : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                        }`}
-                      >
-                        {item.badge}
-                      </span>
+                    {!isCollapsed && (
+                      <>
+                        {/* Badge Đơn hàng hoạt động: Ưu tiên hiển thị số lượng 1 kèm hiệu ứng pulse */}
+                        {showOrderBadge ? (
+                          <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+                            <span>1</span>
+                          </span>
+                        ) : item.badge ? (
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                              item.badge === 'HOT'
+                                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                                : item.badge === 'AI'
+                                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                                : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                            }`}
+                          >
+                            {item.badge}
+                          </span>
+                        ) : null}
+                      </>
                     )}
                   </button>
                 );
@@ -163,14 +203,14 @@ export default function CustomerSidebar({ activeTab, setActiveTab, isCollapsed, 
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-bold text-white truncate">{userDisplayName}</p>
-                <p className="text-[11px] text-slate-500 truncate">{user?.email || 'customer@fixgo.vn'}</p>
+                <p className="text-[11px] text-slate-300 truncate">{user?.email || 'customer@fixgo.vn'}</p>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-600 shrink-0" />
+              <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
             </div>
 
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs font-bold transition-all cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/20 text-xs font-bold transition-all cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Đăng xuất</span>
@@ -179,7 +219,7 @@ export default function CustomerSidebar({ activeTab, setActiveTab, isCollapsed, 
         ) : (
           <button
             onClick={handleLogout}
-            className="w-full py-2.5 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center hover:bg-rose-500/20 transition-all cursor-pointer"
+            className="w-full py-2.5 rounded-xl bg-rose-500/10 text-rose-300 flex items-center justify-center hover:bg-rose-500/20 transition-all cursor-pointer"
             title="Đăng xuất"
           >
             <LogOut className="w-4 h-4" />

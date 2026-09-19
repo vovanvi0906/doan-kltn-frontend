@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { X, ShieldAlert, Loader2, AlertTriangle } from 'lucide-react';
 
-export default function DeleteServiceModal({
+/**
+ * DeleteCategoryModal Component
+ * Modal xác nhận xóa danh mục ngành nghề an toàn.
+ */
+export default function DeleteCategoryModal({
   isOpen,
   onClose,
   onConfirm,
-  serviceName,
-  orderCount = 0,
+  categoryName,
+  serviceCount = 0,
   isSubmitting = false,
 }) {
   const [forceDelete, setForceDelete] = useState(false);
@@ -20,8 +24,8 @@ export default function DeleteServiceModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 dark:bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200 select-none">
-      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 dark:bg-slate-950/80 backdrop-blur-xs select-none">
+      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
         {/* Close Button */}
         <button
           type="button"
@@ -39,14 +43,14 @@ export default function DeleteServiceModal({
           </div>
           <div className="space-y-1 pr-6">
             <h3 className="text-base font-bold text-slate-900 dark:text-white tracking-tight leading-snug">
-              Xác Nhận Xóa Dịch Vụ
+              Xác Nhận Xóa Danh Mục
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Bạn có chắc chắn muốn xóa dịch vụ này khỏi hệ thống?
+              Bạn có chắc chắn muốn xóa nhóm ngành nghề này?
             </p>
-            {serviceName && (
+            {categoryName && (
               <div className="text-xs font-bold text-rose-700 dark:text-rose-300 mt-1 p-2 rounded-lg bg-rose-50/50 dark:bg-slate-950/80 border border-rose-200/60 dark:border-slate-800/80 truncate">
-                Dịch vụ: {serviceName}
+                Danh mục: {categoryName} {serviceCount > 0 ? `(${serviceCount} dịch vụ trực thuộc)` : ''}
               </div>
             )}
           </div>
@@ -55,18 +59,21 @@ export default function DeleteServiceModal({
         {/* Force Delete Option */}
         <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 flex items-start gap-2.5">
           <input
-            id="force-delete-checkbox"
+            id="force-delete-cat-checkbox"
             type="checkbox"
             checked={forceDelete}
             onChange={(e) => setForceDelete(e.target.checked)}
             className="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-rose-600 focus:ring-rose-500 cursor-pointer"
           />
-          <label htmlFor="force-delete-checkbox" className="text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+          <label
+            htmlFor="force-delete-cat-checkbox"
+            className="text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none"
+          >
             <span className="font-bold text-rose-600 dark:text-rose-400 block">
               Xóa vĩnh viễn (Force Delete)
             </span>
             <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5 leading-relaxed">
-              Xóa triệt để dịch vụ khỏi cơ sở dữ liệu và dọn dẹp các đơn hàng thử nghiệm liên kết.
+              Xóa triệt để danh mục và toàn bộ các gói dịch vụ trực thuộc khỏi cơ sở dữ liệu.
             </span>
           </label>
         </div>
@@ -76,7 +83,7 @@ export default function DeleteServiceModal({
           <p className="text-[11px] text-slate-500 dark:text-slate-400 italic p-2.5 rounded-lg bg-slate-50/70 dark:bg-slate-950/40 border border-slate-200/80 dark:border-slate-800/50 flex items-start gap-1.5">
             <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
             <span>
-              Mặc định: Nếu dịch vụ đã có đơn hàng phát sinh, hệ thống sẽ chuyển sang trạng thái <strong>Tạm Ngưng (Soft Delete)</strong> để giữ toàn vẹn dữ liệu. Tích chọn "Xóa vĩnh viễn" ở trên nếu muốn xóa hẳn.
+              Mặc định: Nếu danh mục đang có dịch vụ liên kết, hệ thống sẽ chuyển sang trạng thái <strong>Tạm Ngưng (Soft Delete)</strong>.
             </span>
           </p>
         )}

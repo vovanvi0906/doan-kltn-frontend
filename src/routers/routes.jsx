@@ -6,7 +6,8 @@ import DashboardPage from '../features/dashboard/pages/DashboardPage';
 import UsersPage from '../features/users/pages/UsersPage';
 import WorkersManagementPage from '../features/workers/pages/WorkersManagementPage';
 import OrdersManagementPage from '../features/orders/pages/OrdersManagementPage';
-import ServicesManagementPage from '../features/services/pages/ServicesManagementPage';
+import CategoryManagementPage from '../features/services/pages/CategoryManagementPage';
+import ServiceManagementPage from '../features/services/pages/ServiceManagementPage';
 import AnalyticsPage from '../features/analytics/pages/AnalyticsPage';
 import SystemSettingsPage from '../features/settings/pages/SystemSettingsPage';
 import WorkerDashboardPage from '../features/workers/pages/WorkerDashboardPage';
@@ -49,7 +50,8 @@ export default function AppRoutes() {
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="workers" element={<WorkersManagementPage />} />
-        <Route path="services" element={<ServicesManagementPage />} />
+        <Route path="categories" element={<CategoryManagementPage />} />
+        <Route path="services" element={<ServiceManagementPage />} />
         <Route path="orders" element={<OrdersManagementPage />} />
         <Route path="payments" element={<div className="p-4 text-slate-500">Chức năng Thanh toán & Ví tiền đang hoàn thiện.</div>} />
         <Route path="commissions" element={<div className="p-4 text-slate-500">Chức năng Hoa hồng & Chiết khấu đang hoàn thiện.</div>} />
@@ -69,12 +71,20 @@ export default function AppRoutes() {
       />
       <Route path="/worker" element={<Navigate to="/worker/dashboard" replace />} />
 
-      {/* 4. Customer / Home Route */}
+      {/* 4. Customer / Home Route & Direct Services Route */}
       <Route
         path="/"
         element={
           <ProtectedRoute allowedRoles={['CUSTOMER', 'ADMIN', 'WORKER']}>
             <HomeOrDashboardRedirect />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/services"
+        element={
+          <ProtectedRoute allowedRoles={['CUSTOMER', 'ADMIN', 'WORKER']}>
+            <HomePage initialTab="services" />
           </ProtectedRoute>
         }
       />
